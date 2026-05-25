@@ -47,7 +47,7 @@ const MANUM_CONFIG = {
         // Attendance → goes to this sheet (will be created by setup script)
         // REPLACE the sheetId below after you create the Dochádzka file on Drive
         attendance: {
-          sheetId: "REPLACE_WITH_ATTENDANCE_SHEET_ID",
+          sheetId: "1mqCEh8mv7yYNdvegrbSNMgeapUr79ZJlyfRjZVq6vas",
           tab: "Dochádzka 2026",
         },
       },
