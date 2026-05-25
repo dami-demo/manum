@@ -1,0 +1,19 @@
+{
+  "name": "MANUM Dielňa",
+  "short_name": "MANUM",
+  "description": "Prototypová dielňa – platby, dochádzka, materiály",
+  "start_url": "/manum/",
+  "scope": "/manum/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
