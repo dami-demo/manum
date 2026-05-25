@@ -16,7 +16,7 @@ const MANUM_CONFIG = {
   // name: displayed in the app and written to sheets
   // pin: used for login
   members: [
-    { id: "michal",  name: "Michal Golák",     pin: "1111" },
+    { id: "michal",  name: "Michal Golák",     pin: "1312" },
     { id: "dami",    name: "Dami Demovič",      pin: "2222" },
     { id: "vlado",   name: "Vlado Višvadra",    pin: "3333" },
     { id: "matej",   name: "Matej Maturkanič",  pin: "4444" },
