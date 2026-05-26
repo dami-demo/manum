@@ -1084,17 +1084,40 @@ async function submitManualAttendance() {
 }
 
 // ── API CALL ──────────────────────────────────────────────────────────────────
-async function postToScript(payload) {
-  try {
+function postToScript(payload) {
+  return new Promise((resolve) => {
+    const callbackName = "manumCallback_" + Date.now();
     const encoded = encodeURIComponent(JSON.stringify(payload));
-    console.log("URL:", MANUM_CONFIG.appsScriptUrl + "?action=write&payload=" + encoded);
-    const url = MANUM_CONFIG.appsScriptUrl + "?action=write&payload=" + encoded;
-    await fetch(url, { method: "GET", mode: "no-cors" });
-    return true;
-  } catch (err) {
-    console.error("postToScript error:", err);
-    return false;
-  }
+    const url = MANUM_CONFIG.appsScriptUrl
+      + "?action=write&payload=" + encoded
+      + "&callback=" + callbackName;
+
+    const script = document.createElement("script");
+    script.src = url;
+
+    const timeout = setTimeout(() => {
+      cleanup();
+      resolve(false);
+    }, 10000);
+
+    window[callbackName] = function(data) {
+      cleanup();
+      resolve(data && data.success === true);
+    };
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    script.onerror = function() {
+      cleanup();
+      resolve(false);
+    };
+
+    document.head.appendChild(script);
+  });
 }
 
 // ── START ─────────────────────────────────────────────────────────────────────
