@@ -1086,14 +1086,13 @@ async function submitManualAttendance() {
 // ── API CALL ──────────────────────────────────────────────────────────────────
 async function postToScript(payload) {
   try {
-    const form = new FormData();
-    form.append("data", JSON.stringify(payload));
-    await fetch(MANUM_CONFIG.appsScriptUrl, {
-      method: "POST",
-      body:   form,
-      mode:   "no-cors",
-    });
-    return true;
+    // Use GET with encoded payload to avoid CORS/redirect issues with Apps Script POST
+    const encoded = encodeURIComponent(JSON.stringify(payload));
+    const url = MANUM_CONFIG.appsScriptUrl + "?action=write&payload=" + encoded;
+    const resp = await fetch(url, { method: "GET", mode: "cors" });
+    const text = await resp.text();
+    const data = JSON.parse(text);
+    return data.success === true;
   } catch (err) {
     console.error("postToScript error:", err);
     return false;
