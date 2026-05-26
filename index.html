@@ -1,1125 +1,695 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1a1a1a">
-<title>MANUM</title>
-<link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MANUM – Finančný Dashboard 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg:       #111111;
-    --surface:  #1c1c1c;
-    --border:   #2e2e2e;
-    --accent:   #d4a843;
-    --accent2:  #e8c87a;
-    --text:     #f0ece4;
-    --muted:    #888;
-    --danger:   #e05c4b;
-    --success:  #5cb87a;
-    --radius:   12px;
-    --mono:     'DM Mono', monospace;
-    --sans:     'Syne', sans-serif;
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0D0F14;--surface:#141720;--surfacehi:#1C2030;--border:#252A3A;
+    --accent:#F5A623;--accentdim:#3D2A08;
+    --green:#2ECC71;--greendim:#0D3D22;
+    --red:#E74C3C;--reddim:#3D120E;
+    --blue:#3B82F6;--bluedim:#0F2550;
+    --purple:#A855F7;--purpledim:#2D1060;
+    --text:#E8EAF0;--mid:#8B90A0;--dim:#40465A;
   }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100dvh;
-    overflow-x: hidden;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* ── SCREENS ── */
-  .screen { display: none; min-height: 100dvh; flex-direction: column; }
-  .screen.active { display: flex; }
-
-  /* ── LOGIN SCREEN ── */
-  #screen-login {
-    align-items: center;
-    justify-content: center;
-    background: var(--bg);
-    padding: 2rem;
-    gap: 2rem;
-  }
-
-  .login-logo {
-    font-family: var(--sans);
-    font-weight: 800;
-    font-size: 3.5rem;
-    letter-spacing: -0.04em;
-    color: var(--accent);
-    line-height: 1;
-  }
-
-  .login-sub {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--muted);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    text-align: center;
-  }
-
-  .member-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    width: 100%;
-    max-width: 340px;
-  }
-
-  .member-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 0.75rem;
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-    text-align: center;
-  }
-  .member-btn:active { background: #252525; border-color: var(--accent); }
-
-  .pin-area {
-    width: 100%;
-    max-width: 340px;
-    display: none;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .pin-area.visible { display: flex; }
-
-  .pin-label {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-align: center;
-  }
-
-  .pin-dots {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-  }
-
-  .pin-dot {
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    background: transparent;
-    transition: background 0.15s, border-color 0.15s;
-  }
-  .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
-
-  .pin-keypad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
-  }
-
-  .key {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 1.3rem;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.1s;
-    user-select: none;
-  }
-  .key:active { background: #2a2a2a; }
-  .key.del { font-size: 1rem; color: var(--muted); }
-  .key.empty { visibility: hidden; }
-
-  .pin-error {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    color: var(--danger);
-    text-align: center;
-    min-height: 1em;
-  }
-
-  .back-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    cursor: pointer;
-    text-align: center;
-    letter-spacing: 0.05em;
-    padding: 0.5rem;
-  }
-
-  /* ── HOME SCREEN ── */
-  #screen-home {
-    background: var(--bg);
-  }
-
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.25rem 1.25rem 0;
-  }
-
-  .topbar-logo {
-    font-family: var(--sans);
-    font-weight: 800;
-    font-size: 1.4rem;
-    color: var(--accent);
-    letter-spacing: -0.03em;
-  }
-
-  .topbar-user {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--muted);
-    text-align: right;
-  }
-
-  .logout-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 0.25rem;
-  }
-
-  .home-greeting {
-    padding: 1.5rem 1.25rem 0.5rem;
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .home-greeting span { color: var(--accent); }
-
-  .module-grid {
-    padding: 1rem 1.25rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
-  .module-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem 1rem;
-    cursor: pointer;
-    transition: border-color 0.15s, transform 0.1s;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .module-card:active { transform: scale(0.97); border-color: var(--accent); }
-
-  .module-icon { font-size: 1.8rem; }
-  .module-label {
-    font-weight: 700;
-    font-size: 0.9rem;
-  }
-  .module-desc {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-  }
-
-  /* ── FORM SCREENS ── */
-  .form-screen {
-    background: var(--bg);
-  }
-
-  .form-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1.25rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .form-back {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: 1.3rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0.25rem;
-  }
-
-  .form-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
-
-  .form-body {
-    padding: 1.25rem;
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .field-label {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .field input,
-  .field select,
-  .field textarea {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 1rem;
-    padding: 0.8rem 1rem;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.15s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus { border-color: var(--accent); }
-
-  .field select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    padding-right: 2.5rem;
-  }
-
-  .field option { background: #1c1c1c; }
-
-  /* Toggle: income / expense */
-  .toggle-row {
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .toggle-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: var(--sans);
-    font-weight: 600;
-    font-size: 0.9rem;
-    padding: 0.8rem;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-  }
-  .toggle-btn.active-income  { background: #1f3a28; color: var(--success); }
-  .toggle-btn.active-expense { background: #3a1f1f; color: var(--danger); }
-
-  /* Toggle: cash / card */
-  .payment-toggle {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .ptoggle-btn {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--muted);
-    font-family: var(--sans);
-    font-weight: 600;
-    font-size: 0.85rem;
-    padding: 0.8rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: center;
-  }
-  .ptoggle-btn.active { background: #2a2416; border-color: var(--accent); color: var(--accent); }
-
-  /* DPH warning */
-  .dph-notice {
-    background: #2a1f10;
-    border: 1px solid #6b4a1a;
-    border-radius: var(--radius);
-    padding: 0.75rem 1rem;
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    color: #d4943a;
-    line-height: 1.5;
-    display: none;
-  }
-  .dph-notice.visible { display: block; }
-
-  /* Submit button */
-  .submit-btn {
-    background: var(--accent);
-    border: none;
-    border-radius: var(--radius);
-    color: #111;
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 1rem;
-    padding: 1rem;
-    width: 100%;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: opacity 0.15s;
-  }
-  .submit-btn:active { opacity: 0.8; }
-  .submit-btn:disabled { opacity: 0.4; }
-
-  /* Status messages */
-  .status-msg {
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    text-align: center;
-    padding: 0.5rem;
-    border-radius: 8px;
-    display: none;
-  }
-  .status-msg.success { background: #1a2e20; color: var(--success); display: block; }
-  .status-msg.error   { background: #2e1a1a; color: var(--danger);  display: block; }
-  .status-msg.loading { background: #1e1e1e; color: var(--muted);   display: block; }
-
-  /* ── ATTENDANCE SCREEN ── */
-  .attendance-body {
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .clock-display {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    text-align: center;
-  }
-
-  .clock-time {
-    font-family: var(--mono);
-    font-size: 2.5rem;
-    font-weight: 500;
-    color: var(--accent);
-    letter-spacing: 0.05em;
-  }
-
-  .clock-date {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-top: 0.3rem;
-  }
-
-  .att-mode-toggle {
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .att-mode-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: var(--sans);
-    font-weight: 600;
-    font-size: 0.85rem;
-    padding: 0.75rem;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .att-mode-btn.active { background: #1e1e1e; color: var(--text); }
-
-  .att-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
-  .att-btn {
-    border: none;
-    border-radius: var(--radius);
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 0.95rem;
-    padding: 1.1rem;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .att-btn:active { opacity: 0.8; }
-  .att-btn.arrive { background: #1f3a28; color: var(--success); }
-  .att-btn.leave  { background: #3a1f1f; color: var(--danger); }
-
-  .manual-hours {
-    display: none;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .manual-hours.visible { display: flex; }
+  body{background:var(--bg);color:var(--text);font-family:'DM Mono','Courier New',monospace;min-height:100vh}
+  /* HEADER */
+  .header{border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
+  .header-sub{font-size:10px;letter-spacing:3px;color:var(--accent);font-weight:700;margin-bottom:3px}
+  .header-title{font-size:20px;font-weight:700;letter-spacing:-0.5px}
+  .header-right{text-align:right;font-size:10px;color:var(--dim)}
+  .header-right span{color:var(--mid)}
+  .btn-refresh{background:var(--surfacehi);border:1px solid var(--border);border-radius:6px;color:var(--accent);
+    cursor:pointer;padding:7px 14px;font-size:11px;font-family:inherit;font-weight:700;letter-spacing:1px;margin-left:12px}
+  .btn-refresh:disabled{color:var(--dim);cursor:not-allowed}
+  /* TABS */
+  .tabs{border-bottom:1px solid var(--border);padding:0 28px;display:flex}
+  .tab{background:none;border:none;cursor:pointer;padding:13px 18px;font-size:11px;font-family:inherit;
+    letter-spacing:1px;font-weight:600;color:var(--mid);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  /* CONTENT */
+  .content{padding:24px 28px}
+  /* LOADER */
+  .loader{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:320px;gap:16px}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top:3px solid var(--accent);
+    border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loader-text{color:var(--mid);font-size:13px}
+  /* ERROR */
+  .error-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:320px;gap:12px}
+  .error-icon{font-size:32px}
+  .error-title{color:var(--red);font-weight:700}
+  .error-msg{color:var(--mid);font-size:12px;max-width:420px;text-align:center;line-height:1.6}
+  .btn-retry{background:var(--red);border:none;border-radius:6px;color:#fff;padding:8px 20px;
+    cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;margin-top:8px}
+  /* KPI GRID */
+  .kpi-grid{display:grid;gap:14px;margin-bottom:20px}
+  .kpi-grid.cols4{grid-template-columns:repeat(4,1fr)}
+  .kpi-grid.cols3{grid-template-columns:repeat(3,1fr)}
+  .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px}
+  .kpi-label{font-size:9px;letter-spacing:2px;color:var(--mid);margin-bottom:6px}
+  .kpi-val{font-size:22px;font-weight:700;margin-bottom:3px}
+  .kpi-sub{font-size:10px;color:var(--dim)}
+  /* BOX */
+  .box{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px}
+  .box-title{padding:11px 16px;border-bottom:1px solid var(--border);font-size:9px;letter-spacing:2px;color:var(--mid)}
+  .box-body{padding:16px}
+  /* GRID 2COL */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  /* INFO ROW */
+  .info-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px}
+  .info-row .lbl{color:var(--mid)}
+  .info-row .val{font-weight:500}
+  .info-row.bold .val{font-weight:700}
+  .divider{border-top:1px solid var(--border);margin:6px 0;padding-top:6px}
+  /* PROGRESS BARS */
+  .progress-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;margin-bottom:14px}
+  .prog-item{text-align:center}
+  .prog-label{font-size:9px;color:var(--dim);margin-bottom:3px}
+  .prog-track{height:44px;background:var(--border);border-radius:3px;overflow:hidden;position:relative}
+  .prog-bar{position:absolute;bottom:0;width:100%;transition:height .4s}
+  .prog-pct{font-size:9px;color:var(--text);margin-top:3px}
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th{padding:9px 12px;color:var(--mid);font-weight:600;font-size:9px;letter-spacing:.5px;background:var(--surfacehi)}
+  td{padding:9px 12px;border-top:1px solid var(--border)}
+  tr:nth-child(even) td{background:rgba(28,32,48,.5)}
+  tfoot td{background:var(--surfacehi);font-weight:700;border-top:2px solid var(--border)}
+  .text-right{text-align:right}
+  /* BADGES */
+  .badge{border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap}
+  .badge-green{background:var(--greendim);color:var(--green)}
+  .badge-blue{background:var(--bluedim);color:var(--blue)}
+  .badge-accent{background:var(--accentdim);color:var(--accent)}
+  .badge-mid{background:var(--surfacehi);color:var(--mid)}
+  /* SOURCE CHIPS */
+  .chip{border-radius:4px;padding:2px 7px;font-size:10px}
+  .chip-blue{background:var(--bluedim);color:var(--blue)}
+  .chip-mid{background:var(--surfacehi);color:var(--mid)}
+  /* MEMBER AVATAR */
+  .member-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+  .member-left{display:flex;align-items:center;gap:10px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--purpledim);display:flex;align-items:center;
+    justify-content:center;font-size:14px;font-weight:700;color:var(--purple)}
+  .member-name{font-weight:600;font-size:13px}
+  .member-val{font-weight:700;color:var(--purple);font-size:16px}
+  /* COVERAGE BOX */
+  .coverage-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+  .coverage-pct{font-size:28px;font-weight:700;line-height:1}
+  .coverage-sub{font-size:10px;color:var(--dim);margin-top:2px}
+  /* ALERT BOX */
+  .alert-box{border-radius:6px;padding:12px;margin-top:12px;font-size:11px}
+  .alert-title{font-weight:700;font-size:10px;margin-bottom:4px}
+  /* CHART */
+  .chart-wrap{position:relative;height:300px;margin-bottom:8px}
+  .pie-wrap{position:relative;height:220px}
+  /* NOTE */
+  .note{font-size:11px;color:var(--dim);margin-top:8px;line-height:1.5}
+  /* HIDDEN */
+  .hidden{display:none}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════
-     SCREEN 1: LOGIN
-══════════════════════════════════════════════════════════ -->
-<div class="screen active" id="screen-login">
-  <div class="login-logo">MANUM</div>
-  <div class="login-sub">Prototypová dielňa · Drevo · Kov · 3D tlač</div>
-
-  <div class="member-grid" id="member-grid">
-    <!-- Populated from config.js -->
+<div class="header">
+  <div>
+    <div class="header-sub">MANUM S.R.O. · IČO 50 559 532</div>
+    <div class="header-title">Finančný Dashboard 2026</div>
   </div>
-
-  <div class="pin-area" id="pin-area">
-    <div class="pin-label" id="pin-label">Zadaj PIN</div>
-    <div class="pin-dots" id="pin-dots"></div>
-    <div class="pin-keypad">
-      <button class="key" onclick="pinKey('1')">1</button>
-      <button class="key" onclick="pinKey('2')">2</button>
-      <button class="key" onclick="pinKey('3')">3</button>
-      <button class="key" onclick="pinKey('4')">4</button>
-      <button class="key" onclick="pinKey('5')">5</button>
-      <button class="key" onclick="pinKey('6')">6</button>
-      <button class="key" onclick="pinKey('7')">7</button>
-      <button class="key" onclick="pinKey('8')">8</button>
-      <button class="key" onclick="pinKey('9')">9</button>
-      <button class="key empty"></button>
-      <button class="key" onclick="pinKey('0')">0</button>
-      <button class="key del" onclick="pinDel()">⌫</button>
+  <div style="display:flex;align-items:center">
+    <div class="header-right">
+      <div><span>Google Drive sync</span></div>
+      <div id="last-sync">–</div>
     </div>
-    <div class="pin-error" id="pin-error"></div>
-    <button class="back-btn" onclick="showMemberGrid()">← Späť</button>
+    <button class="btn-refresh" id="btn-refresh" onclick="loadData()">↻ Refresh</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     SCREEN 2: HOME
-══════════════════════════════════════════════════════════ -->
-<div class="screen" id="screen-home">
-  <div class="topbar">
-    <div class="topbar-logo">MANUM</div>
-    <div style="display:flex;align-items:center;gap:0.5rem;">
-      <div class="topbar-user" id="topbar-user"></div>
-      <button class="logout-btn" onclick="logout()" title="Odhlásiť">⏻</button>
-    </div>
-  </div>
-
-  <div class="home-greeting">
-    Ahoj, <span id="greeting-name"></span>
-  </div>
-
-  <div class="module-grid" id="module-grid">
-    <!-- Populated from config.js -->
-  </div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('prehlad',this)">Prehľad</button>
+  <button class="tab" onclick="switchTab('cashflow',this)">Cashflow</button>
+  <button class="tab" onclick="switchTab('zakazky',this)">Zákazky</button>
+  <button class="tab" onclick="switchTab('vydavky',this)">Výdavky</button>
+  <button class="tab" onclick="switchTab('clenske',this)">Členské</button>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     SCREEN 3: PAYMENT FORM
-══════════════════════════════════════════════════════════ -->
-<div class="screen form-screen" id="screen-payment">
-  <div class="form-header">
-    <button class="form-back" onclick="showScreen('home')">←</button>
-    <div class="form-title">💳 Nová platba</div>
+<div class="content">
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text" id="loader-text">Načítavam z Google Drive…</div>
   </div>
 
-  <div class="form-body">
-
-    <!-- Income / Expense toggle -->
-    <div class="field">
-      <div class="field-label">Typ</div>
-      <div class="toggle-row">
-        <button class="toggle-btn active-income" id="btn-income" onclick="setDirection('income')">↑ Príjem</button>
-        <button class="toggle-btn" id="btn-expense" onclick="setDirection('expense')">↓ Výdavok</button>
-      </div>
-    </div>
-
-    <!-- Cash / Card toggle -->
-    <div class="field">
-      <div class="field-label">Spôsob platby</div>
-      <div class="payment-toggle">
-        <button class="ptoggle-btn active" id="btn-cash" onclick="setPaymentType('cash')">💵 Hotovosť</button>
-        <button class="ptoggle-btn" id="btn-card" onclick="setPaymentType('card')">💳 Karta / Prevod</button>
-      </div>
-    </div>
-
-    <!-- DPH warning for cash with DPH -->
-    <div class="dph-notice" id="dph-notice">
-      ⚠ Hotovostná platba s DPH sa zaradí do cash súboru a bude označená na kontrolu. Toto bude opravené v budúcej verzii.
-    </div>
-
-    <!-- Amount -->
-    <div class="field">
-      <div class="field-label">Suma (€)</div>
-      <input type="number" id="f-amount" placeholder="0.00" inputmode="decimal" step="0.01" min="0">
-    </div>
-
-    <!-- Description -->
-    <div class="field">
-      <div class="field-label">Popis</div>
-      <input type="text" id="f-desc" placeholder="Stručný popis platby">
-    </div>
-
-    <!-- Category -->
-    <div class="field">
-      <div class="field-label">Kategória</div>
-      <select id="f-category">
-        <!-- Populated dynamically based on direction -->
-      </select>
-    </div>
-
-    <!-- Date -->
-    <div class="field">
-      <div class="field-label">Dátum</div>
-      <input type="date" id="f-date">
-    </div>
-
-    <!-- DPH toggle (only shown for card payments - income) -->
-    <div class="field" id="dph-field" style="display:none;">
-      <div class="field-label">Obsahuje DPH?</div>
-      <div class="payment-toggle">
-        <button class="ptoggle-btn" id="btn-nodph" onclick="setDph(false)">Bez DPH</button>
-        <button class="ptoggle-btn active" id="btn-dph" onclick="setDph(true)">S DPH (23%)</button>
-      </div>
-    </div>
-
-    <!-- Note -->
-    <div class="field">
-      <div class="field-label">Poznámka (nepovinné)</div>
-      <input type="text" id="f-note" placeholder="">
-    </div>
-
-    <div class="status-msg" id="payment-status"></div>
-    <button class="submit-btn" id="payment-submit" onclick="submitPayment()">Uložiť platbu →</button>
+  <!-- ERROR -->
+  <div class="error-screen hidden" id="error-screen">
+    <div class="error-icon">⚠</div>
+    <div class="error-title">Nepodarilo sa načítať dáta</div>
+    <div class="error-msg" id="error-msg"></div>
+    <button class="btn-retry" onclick="loadData()">Skúsiť znova</button>
   </div>
+
+  <!-- TABS CONTENT -->
+  <div class="hidden" id="tab-content">
+
+    <!-- PREHĽAD -->
+    <div id="tab-prehlad">
+      <div class="kpi-grid cols4" id="kpi-prehlad"></div>
+      <div class="box">
+        <div class="box-title">POKRYTIE FIXNÝCH NÁKLADOV</div>
+        <div class="box-body">
+          <div class="coverage-header">
+            <div style="font-size:12px;color:var(--mid)" id="coverage-subtitle"></div>
+            <div>
+              <div class="coverage-pct" id="coverage-pct">–</div>
+              <div class="coverage-sub">pokrytie fixných nákladov</div>
+            </div>
+          </div>
+          <div class="progress-grid" id="progress-grid"></div>
+          <div class="kpi-grid cols4" style="margin-bottom:0" id="coverage-stats"></div>
+        </div>
+      </div>
+      <div class="grid2" id="prehlad-bottom"></div>
+    </div>
+
+    <!-- CASHFLOW -->
+    <div id="tab-cashflow" class="hidden">
+      <div class="box">
+        <div class="box-title">MESAČNÝ CASHFLOW – ZÁKAZKY + ČLENSKÉ vs. VÝDAVKY vs. FIXNÉ NÁKLADY</div>
+        <div class="box-body">
+          <div class="chart-wrap"><canvas id="chart-cashflow"></canvas></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="box-title">MESAČNÝ DETAIL</div>
+        <div class="box-body" style="padding:0">
+          <table id="table-cashflow">
+            <thead><tr>
+              <th>Mesiac</th><th class="text-right">Zákazky</th><th class="text-right">Členské</th>
+              <th class="text-right">Spolu príjmy</th><th class="text-right">Výdavky</th>
+              <th class="text-right">Fixné náklady</th><th class="text-right">Rozdiel bez člen.</th>
+              <th class="text-right">Rozdiel s člen.</th>
+            </tr></thead>
+            <tbody id="tbody-cashflow"></tbody>
+            <tfoot><tr id="tfoot-cashflow"></tr></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZÁKAZKY -->
+    <div id="tab-zakazky" class="hidden">
+      <div class="kpi-grid cols3" id="kpi-zakazky"></div>
+      <div class="box hidden" id="box-otvorene">
+        <div class="box-title">⚠ OTVORENÉ – ČAKAJÚ NA PLATBU</div>
+        <div class="box-body" style="padding:0">
+          <table><thead><tr>
+            <th>ID</th><th>Typ</th><th>Klient</th><th>Popis</th>
+            <th>Splatnosť</th><th class="text-right">Suma s DPH</th><th>Stav</th>
+          </tr></thead>
+          <tbody id="tbody-otvorene"></tbody></table>
+        </div>
+      </div>
+      <div class="box">
+        <div class="box-title">VŠETKY ZÁKAZKY 2026</div>
+        <div class="box-body" style="padding:0">
+          <table><thead><tr>
+            <th>ID</th><th>Zdroj</th><th>Klient</th><th>Popis</th><th>Dátum</th>
+            <th class="text-right">Základ</th><th class="text-right">DPH</th>
+            <th class="text-right">Suma s DPH</th><th>Stav</th>
+          </tr></thead>
+          <tbody id="tbody-zakazky"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VÝDAVKY -->
+    <div id="tab-vydavky" class="hidden">
+      <div class="grid2" style="margin-bottom:16px">
+        <div class="box" style="margin-bottom:0">
+          <div class="box-title">VÝDAVKY PODĽA KATEGÓRIE</div>
+          <div class="box-body"><div class="pie-wrap"><canvas id="chart-pie"></canvas></div></div>
+        </div>
+        <div class="box" style="margin-bottom:0">
+          <div class="box-title">KATEGÓRIE – SUMÁR</div>
+          <div class="box-body" id="kat-sumar"></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="box-title">VŠETKY VÝDAVKY 2026</div>
+        <div class="box-body" style="padding:0">
+          <table><thead><tr>
+            <th>Dátum</th><th>Zdroj</th><th>Príjemca</th><th>Popis</th><th>Kat.</th>
+            <th class="text-right">Základ</th><th class="text-right">DPH</th>
+            <th class="text-right">Suma</th><th>Stav</th>
+          </tr></thead>
+          <tbody id="tbody-vydavky"></tbody>
+          <tfoot><tr id="tfoot-vydavky"></tr></tfoot>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ČLENSKÉ -->
+    <div id="tab-clenske" class="hidden">
+      <div class="kpi-grid cols3" id="kpi-clenske"></div>
+      <div class="grid2">
+        <div class="box" style="margin-bottom:0">
+          <div class="box-title">ČLENSKÉ PRÍSPEVKY / MES.</div>
+          <div class="box-body" id="clenske-list"></div>
+        </div>
+        <div class="box" style="margin-bottom:0">
+          <div class="box-title">FIXNÉ NÁKLADY / MES.</div>
+          <div class="box-body" id="fixne-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-content -->
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     SCREEN 4: ATTENDANCE
-══════════════════════════════════════════════════════════ -->
-<div class="screen form-screen" id="screen-attendance">
-  <div class="form-header">
-    <button class="form-back" onclick="showScreen('home')">←</button>
-    <div class="form-title">🕐 Dochádzka</div>
-  </div>
-
-  <div class="attendance-body">
-
-    <div class="clock-display">
-      <div class="clock-time" id="att-clock">00:00</div>
-      <div class="clock-date" id="att-date"></div>
-    </div>
-
-    <div class="att-mode-toggle">
-      <button class="att-mode-btn active" id="btn-quick" onclick="setAttMode('quick')">Rýchle zaznamenanie</button>
-      <button class="att-mode-btn" id="btn-manual" onclick="setAttMode('manual')">Zadať ručne</button>
-    </div>
-
-    <!-- Quick mode -->
-    <div id="att-quick-mode">
-      <div class="att-actions">
-        <button class="att-btn arrive" onclick="logAttendance('arrive')">✓ Príchod</button>
-        <button class="att-btn leave"  onclick="logAttendance('leave')">✗ Odchod</button>
-      </div>
-    </div>
-
-    <!-- Manual mode -->
-    <div class="manual-hours" id="att-manual-mode">
-      <div class="field">
-        <div class="field-label">Dátum</div>
-        <input type="date" id="att-date-input">
-      </div>
-      <div class="field">
-        <div class="field-label">Príchod</div>
-        <input type="time" id="att-arrive-input">
-      </div>
-      <div class="field">
-        <div class="field-label">Odchod</div>
-        <input type="time" id="att-leave-input">
-      </div>
-      <div class="field">
-        <div class="field-label">Alebo: priamo hodiny celkom</div>
-        <input type="number" id="att-hours-input" placeholder="napr. 7.5" step="0.5" min="0" max="24" inputmode="decimal">
-      </div>
-      <!-- Activity split — optional -->
-      <div style="border-top:1px solid var(--border);padding-top:0.75rem;margin-top:0.25rem;">
-        <div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.75rem;">
-          Rozdelenie činností (nepovinné)
-        </div>
-        <div class="field">
-          <div class="field-label">Z toho upratovanie (hod.)</div>
-          <input type="number" id="att-cleaning-input" placeholder="napr. 2" step="0.5" min="0" max="24" inputmode="decimal">
-        </div>
-        <div class="field">
-          <div class="field-label">Z toho iné (hod.)</div>
-          <input type="number" id="att-work-input" placeholder="napr. 5.5" step="0.5" min="0" max="24" inputmode="decimal">
-        </div>
-        <div style="font-family:var(--mono);font-size:0.68rem;color:var(--muted);line-height:1.5;margin-top:0.25rem;">
-          Súčet nemusí presne sedieť s celkovým časom (prestávky, iné). Slúži na výpočet odmeny za upratovanie.
-        </div>
-      </div>
-
-      <div class="field">
-        <div class="field-label">Poznámka</div>
-        <input type="text" id="att-note-input" placeholder="nepovinné">
-      </div>
-      <button class="submit-btn" onclick="submitManualAttendance()">Uložiť →</button>
-    </div>
-
-    <div class="status-msg" id="att-status"></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     JS
-══════════════════════════════════════════════════════════ -->
-<script src="config.js"></script>
 <script>
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let currentMember = null;
-let pinBuffer = "";
-let pendingMember = null;
-let payDirection = "income";
-let payType = "cash";
-let hasDph = true;
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9yhA_e9E6VhOH9OFurnE-az9uM6gA9tTJ673sYOPpZKy0pNVoNqV5eLBLbZNiMsW3kA/exec";
+const MESIACE   = ["Jan","Feb","Mar","Apr","Máj","Jún","Júl","Aug","Sep","Okt","Nov","Dec"];
+const MESIACE_F = ["Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"];
+const PIE_COLS  = ["#F5A623","#3B82F6","#2ECC71","#E74C3C","#A855F7","#14B8A6"];
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function getYearConfig() {
-  const y = new Date().getFullYear();
-  return MANUM_CONFIG.years.find(x => x.year === y) || MANUM_CONFIG.years[MANUM_CONFIG.years.length - 1];
+let RAW = null;
+let chartCashflow = null;
+let chartPie = null;
+let currentTab = "prehlad";
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────────
+function eur(n) {
+  return new Intl.NumberFormat("sk-SK",{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0)+" €";
+}
+function eurS(n) {
+  return new Intl.NumberFormat("sk-SK",{maximumFractionDigits:0}).format(n||0)+" €";
+}
+function badge(stav) {
+  const map = {
+    "Zaplatená":     "badge badge-green",
+    "Vystavená":     "badge badge-blue",
+    "Čaká na platbu":"badge badge-accent",
+  };
+  return `<span class="${map[stav]||'badge badge-mid'}">${stav||"–"}</span>`;
+}
+function chip(txt, type) {
+  return `<span class="chip chip-${type}">${txt}</span>`;
+}
+function colorVal(n, pos, neg) {
+  return `style="color:${n>=0?pos:neg}"`;
 }
 
-function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById("screen-" + id).classList.add("active");
-  window.scrollTo(0, 0);
+// ── TABS ─────────────────────────────────────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  ["prehlad","cashflow","zakazky","vydavky","clenske"].forEach(t=>{
+    document.getElementById("tab-"+t).classList.toggle("hidden", t!==id);
+  });
+  currentTab = id;
+  if (id==="cashflow" && RAW) renderCashflowChart();
+  if (id==="vydavky"  && RAW) renderPieChart();
 }
 
-function showStatus(elId, type, msg) {
-  const el = document.getElementById(elId);
-  el.className = "status-msg " + type;
-  el.textContent = msg;
+// ── LOAD ─────────────────────────────────────────────────────────────────────────
+function loadData() {
+  show("loader"); hide("error-screen"); hide("tab-content");
+  document.getElementById("btn-refresh").disabled = true;
+  document.getElementById("loader-text").textContent = "Načítavam z Google Drive…";
+
+  const cbName = "manum_" + Date.now();
+  const script  = document.createElement("script");
+  let done = false;
+
+  const cleanup = () => {
+    done = true;
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+    document.getElementById("btn-refresh").disabled = false;
+  };
+
+  const timer = setTimeout(()=>{
+    if (!done) { cleanup(); showError("Timeout (15s) – skontroluj Apps Script deployment."); }
+  }, 15000);
+
+  window[cbName] = (data) => {
+    clearTimeout(timer); cleanup();
+    RAW = data;
+    const dt = data.lastUpdated ? new Date(data.lastUpdated) : new Date();
+    document.getElementById("last-sync").textContent =
+      dt.toLocaleDateString("sk-SK")+" "+dt.toLocaleTimeString("sk-SK",{hour:"2-digit",minute:"2-digit"});
+    renderAll();
+    hide("loader"); show("tab-content");
+  };
+
+  script.onerror = () => { clearTimeout(timer); cleanup(); showError("Script load failed – skontroluj Apps Script."); };
+  script.src = SCRIPT_URL + "?callback=" + cbName;
+  document.head.appendChild(script);
 }
 
-function clearStatus(elId) {
-  const el = document.getElementById(elId);
-  el.className = "status-msg";
-  el.textContent = "";
+function showError(msg) {
+  document.getElementById("error-msg").textContent = msg;
+  hide("loader"); show("error-screen");
+}
+function show(id){ document.getElementById(id).classList.remove("hidden"); }
+function hide(id){ document.getElementById(id).classList.add("hidden"); }
+
+// ── DERIVE ───────────────────────────────────────────────────────────────────────
+function derive() {
+  const d = RAW;
+  const allP = [
+    ...(d.fakPrijmy||[]).map(r=>({...r,zdroj:"Faktúra"})),
+    ...(d.cashPrijmy||[]).map(r=>({...r,zdroj:"Hotovosť"})),
+  ];
+  const allV = [
+    ...(d.fakVydavky||[]).map(r=>({...r,zdroj:"Banka"})),
+    ...(d.cashVydavky||[]).map(r=>({...r,zdroj:"Hotovosť"})),
+  ];
+  const zaplatene = allP.filter(r=>r.stav==="Zaplatená").reduce((s,r)=>s+r.suma,0);
+  const otvorene  = allP.filter(r=>r.stav!=="Zaplatená");
+  const otvSum    = otvorene.reduce((s,r)=>s+r.suma,0);
+  const vydSum    = allV.reduce((s,r)=>s+r.suma,0);
+  const fixSum    = (d.fixneNaklady||[]).reduce((s,r)=>s+r.suma,0);
+  const clenSum   = (d.clenske||[]).reduce((s,r)=>s+r.suma,0);
+
+  const mesacne = Array.from({length:12},(_,i)=>{
+    const m = i+1;
+    const fakP  = (d.fakPrijmy||[]).filter(r=>r.mesiac===m).reduce((s,r)=>s+r.suma,0);
+    const cashP = (d.cashPrijmy||[]).filter(r=>r.mesiac===m&&r.stav==="Zaplatená").reduce((s,r)=>s+r.suma,0);
+    const vydM  = allV.filter(r=>r.mesiac===m).reduce((s,r)=>s+r.suma,0);
+    return {name:MESIACE[i],nameFull:MESIACE_F[i],fakPrijmy:fakP,cashPrijmy:cashP,vydavky:vydM};
+  });
+
+  const katMap = {};
+  allV.forEach(r=>{ katMap[r.kategoria]=(katMap[r.kategoria]||0)+r.suma; });
+  const katArr = Object.entries(katMap).map(([n,v])=>({name:n,value:+v.toFixed(2)})).sort((a,b)=>b.value-a.value);
+
+  return {allP,allV,zaplatene,otvorene,otvSum,vydSum,fixSum,clenSum,mesacne,katArr};
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-function init() {
-  buildMemberGrid();
-  buildModuleGrid();
-  setTodayDate();
-  startClock();
-
-  // Restore session
-  const saved = sessionStorage.getItem("manum_member");
-  if (saved) {
-    currentMember = JSON.parse(saved);
-    showScreen("home");
-    updateHomeUI();
-  }
+// ── RENDER ALL ───────────────────────────────────────────────────────────────────
+function renderAll() {
+  const d = derive();
+  renderPrehlad(d);
+  renderZakazky(d);
+  renderVydavky(d);
+  renderClenske(d);
+  renderCashflowTable(d);
+  if (currentTab==="cashflow") renderCashflowChart();
+  if (currentTab==="vydavky")  renderPieChart();
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
-function buildMemberGrid() {
-  const grid = document.getElementById("member-grid");
-  grid.innerHTML = MANUM_CONFIG.members.map(m =>
-    `<button class="member-btn" onclick="selectMember('${m.id}')">${m.name.split(" ")[0]}<br><small style="font-weight:400;color:#888;font-size:0.7rem">${m.name.split(" ")[1] || ""}</small></button>`
-  ).join("");
-}
+// ── PREHĽAD ──────────────────────────────────────────────────────────────────────
+function renderPrehlad(d) {
+  const {zaplatene,otvSum,vydSum,fixSum,clenSum,mesacne} = d;
+  const cashflow = zaplatene - vydSum;
+  const activeMths = mesacne.filter(m=>m.fakPrijmy+m.cashPrijmy>0||m.vydavky>0).length || 5;
+  const pokrytePct = Math.min(100,Math.round(((zaplatene+clenSum*activeMths)/(fixSum*activeMths))*100));
 
-function selectMember(id) {
-  pendingMember = MANUM_CONFIG.members.find(m => m.id === id);
-  pinBuffer = "";
-  document.getElementById("pin-area").classList.add("visible");
-  document.getElementById("member-grid").style.display = "none";
-  document.getElementById("pin-label").textContent = pendingMember.name.split(" ")[0] + " – zadaj PIN";
-  document.getElementById("pin-error").textContent = "";
-  renderPinDots();
-}
+  // KPI
+  document.getElementById("kpi-prehlad").innerHTML = [
+    kpiCard("Príjmy (zaplatené)",   eur(zaplatene), "zákazky",                          "var(--green)"),
+    kpiCard("Otvorené pohľadávky",  eur(otvSum),    `${d.otvorene.length} položiek`,    "var(--accent)"),
+    kpiCard("Výdavky zaznamenané",  eur(vydSum),    "hotovosť + banka",                 "var(--red)"),
+    kpiCard("Čistý cashflow",       eur(cashflow),  cashflow>=0?"Prebytok":"Deficit",   cashflow>=0?"var(--green)":"var(--red)"),
+  ].join("");
 
-function showMemberGrid() {
-  document.getElementById("pin-area").classList.remove("visible");
-  document.getElementById("member-grid").style.display = "grid";
-  pinBuffer = "";
-}
+  // Coverage
+  const pctCol = pokrytePct>=100?"var(--green)":pokrytePct>=70?"var(--accent)":"var(--red)";
+  document.getElementById("coverage-pct").textContent = pokrytePct+"%";
+  document.getElementById("coverage-pct").style.color = pctCol;
+  document.getElementById("coverage-subtitle").innerHTML =
+    `Fixné náklady: <b style="color:var(--accent)">${eur(fixSum)}/mes.</b> &nbsp;·&nbsp; Členské: <b style="color:var(--purple)">${eur(clenSum)}/mes.</b>`;
 
-function pinKey(k) {
-  if (pinBuffer.length >= 4) return;
-  pinBuffer += k;
-  renderPinDots();
-  if (pinBuffer.length === 4) {
-    setTimeout(checkPin, 120);
-  }
-}
+  // Progress bars
+  document.getElementById("progress-grid").innerHTML = mesacne.map((m,i)=>{
+    const totalP = m.fakPrijmy+m.cashPrijmy+clenSum;
+    const pct    = Math.min(100,Math.round((totalP/fixSum)*100));
+    const hasData= m.fakPrijmy+m.cashPrijmy>0||m.vydavky>0;
+    const col    = pct>=100?"var(--green)":pct>=70?"var(--accent)":hasData?"var(--red)":"var(--border)";
+    return `<div class="prog-item">
+      <div class="prog-label">${m.name}</div>
+      <div class="prog-track"><div class="prog-bar" style="height:${pct}%;background:${col}"></div></div>
+      <div class="prog-pct">${pct}%</div>
+    </div>`;
+  }).join("");
 
-function pinDel() {
-  pinBuffer = pinBuffer.slice(0, -1);
-  renderPinDots();
-  document.getElementById("pin-error").textContent = "";
-}
+  // Stats
+  document.getElementById("coverage-stats").innerHTML = [
+    kpiCard("Zákazky zaplatené", eur(zaplatene), "YTD",          "var(--green)"),
+    kpiCard("Členské/mes.",      eur(clenSum),   "",             "var(--purple)"),
+    kpiCard("Výdavky (YTD)",     eur(vydSum),    "",             "var(--red)"),
+    kpiCard("Fixné náklady/mes.",eur(fixSum),    "",             "var(--accent)"),
+  ].join("");
 
-function renderPinDots() {
-  const dots = document.getElementById("pin-dots");
-  dots.innerHTML = [0,1,2,3].map(i =>
-    `<div class="pin-dot ${i < pinBuffer.length ? 'filled' : ''}"></div>`
-  ).join("");
-}
+  // Bottom grid
+  const fp = (RAW.fakPrijmy||[]), cp = (RAW.cashPrijmy||[]);
+  const fpZ = fp.filter(r=>r.stav==="Zaplatená").reduce((s,r)=>s+r.suma,0);
+  const cpZ = cp.filter(r=>r.stav==="Zaplatená").reduce((s,r)=>s+r.suma,0);
+  const fpO = fp.filter(r=>r.stav!=="Zaplatená").reduce((s,r)=>s+r.suma,0);
+  const cpO = cp.filter(r=>r.stav!=="Zaplatená").reduce((s,r)=>s+r.suma,0);
+  const cashV = (RAW.cashVydavky||[]).reduce((s,r)=>s+r.suma,0);
+  const fakV  = (RAW.fakVydavky||[]).reduce((s,r)=>s+r.suma,0);
 
-function checkPin() {
-  if (pinBuffer === pendingMember.pin) {
-    currentMember = pendingMember;
-    sessionStorage.setItem("manum_member", JSON.stringify(currentMember));
-    showScreen("home");
-    updateHomeUI();
-  } else {
-    document.getElementById("pin-error").textContent = "Nesprávny PIN. Skús znova.";
-    pinBuffer = "";
-    renderPinDots();
-  }
-}
-
-function logout() {
-  currentMember = null;
-  sessionStorage.removeItem("manum_member");
-  showScreen("login");
-  showMemberGrid();
-}
-
-// ── HOME ──────────────────────────────────────────────────────────────────────
-function buildModuleGrid() {
-  const grid = document.getElementById("module-grid");
-  const enabled = MANUM_CONFIG.modules.filter(m => m.enabled);
-  grid.innerHTML = enabled.map(m => `
-    <div class="module-card" onclick="openModule('${m.id}')">
-      <div class="module-icon">${m.icon}</div>
-      <div class="module-label">${m.label}</div>
+  document.getElementById("prehlad-bottom").innerHTML = `
+    <div class="box" style="margin-bottom:0">
+      <div class="box-title">PRÍJMY – ROZDELENIE</div>
+      <div class="box-body">
+        ${infoRow(`Faktúry zaplatené (${fp.filter(r=>r.stav==="Zaplatená").length})`, eur(fpZ), "var(--green)")}
+        ${infoRow(`Hotovosť zaplatená (${cp.filter(r=>r.stav==="Zaplatená").length})`, eur(cpZ), "var(--green)")}
+        <div class="divider">
+          ${infoRow(`Otvorené faktúry (${fp.filter(r=>r.stav!=="Zaplatená").length})`, eur(fpO), "var(--blue)")}
+          ${infoRow("Hotovosť čaká", eur(cpO), "var(--accent)")}
+        </div>
+        <div class="divider">${infoRow("SPOLU ZAPLATENÉ", eur(zaplatene), "var(--text)", true)}</div>
+      </div>
     </div>
-  `).join("");
+    <div class="box" style="margin-bottom:0">
+      <div class="box-title">VÝDAVKY – ROZDELENIE</div>
+      <div class="box-body">
+        ${infoRow(`Hotovostné (${(RAW.cashVydavky||[]).length})`, eur(cashV), "var(--red)")}
+        ${infoRow(`Bankové prevody (${(RAW.fakVydavky||[]).length})`, eur(fakV), "var(--red)")}
+        <div class="divider">${infoRow("SPOLU VÝDAVKY", eur(vydSum), "var(--text)", true)}</div>
+        <div class="note">⚠ Nájom účet manželka (300€), elektrina (216€) a účtovníčka (160€) nie sú v evidencii.</div>
+      </div>
+    </div>`;
 }
 
-function updateHomeUI() {
-  const first = currentMember.name.split(" ")[0];
-  document.getElementById("greeting-name").textContent = first;
-  document.getElementById("topbar-user").textContent = currentMember.name;
+// ── CASHFLOW TABLE ────────────────────────────────────────────────────────────────
+function renderCashflowTable(d) {
+  const {mesacne,fixSum,clenSum,vydSum,zaplatene} = d;
+  document.getElementById("tbody-cashflow").innerHTML = mesacne.map((m,i)=>{
+    const zak   = m.fakPrijmy+m.cashPrijmy;
+    const spolu = zak+clenSum;
+    const hasData = zak>0||m.vydavky>0;
+    const op = hasData?1:0.3;
+    return `<tr style="opacity:${op}">
+      <td style="font-weight:600">${m.nameFull}</td>
+      <td class="text-right" style="color:${zak>0?"var(--green)":"var(--dim)"}">${zak>0?eur(zak):"–"}</td>
+      <td class="text-right" style="color:var(--purple)">${eur(clenSum)}</td>
+      <td class="text-right" style="font-weight:600">${eur(spolu)}</td>
+      <td class="text-right" style="color:${m.vydavky>0?"var(--red)":"var(--dim)"}">${m.vydavky>0?eur(m.vydavky):"–"}</td>
+      <td class="text-right" style="color:var(--dim)">${eur(fixSum)}</td>
+      <td class="text-right" style="font-weight:700;color:${hasData?(zak-m.vydavky>=0?"var(--green)":"var(--red)"):"var(--dim)"}">${hasData?eur(zak-m.vydavky):"–"}</td>
+      <td class="text-right" style="font-weight:700;color:${hasData?(spolu-m.vydavky>=0?"var(--green)":"var(--red)"):"var(--dim)"}">${hasData?eur(spolu-m.vydavky):"–"}</td>
+    </tr>`;
+  }).join("");
+
+  const totZ = zaplatene, totS = zaplatene+clenSum*5, totV = vydSum;
+  document.getElementById("tfoot-cashflow").innerHTML = `
+    <td style="color:var(--accent)">SPOLU 2026</td>
+    <td class="text-right" style="color:var(--green)">${eur(totZ)}</td>
+    <td class="text-right" style="color:var(--purple)">${eur(clenSum*5)}</td>
+    <td class="text-right">${eur(totS)}</td>
+    <td class="text-right" style="color:var(--red)">${eur(totV)}</td>
+    <td class="text-right" style="color:var(--dim)">–</td>
+    <td class="text-right" style="color:${(totZ-totV)>=0?"var(--green)":"var(--red)"}">${eur(totZ-totV)}</td>
+    <td class="text-right" style="color:${(totS-totV)>=0?"var(--green)":"var(--red)"}">${eur(totS-totV)}</td>`;
 }
 
-function openModule(id) {
-  if (id === "payments") {
-    setDirection("income");
-    setPaymentType("cash");
-    clearStatus("payment-status");
-    document.getElementById("payment-submit").disabled = false;
-    showScreen("payment");
-  } else if (id === "attendance") {
-    showScreen("attendance");
-    setAttDate();
-  } else {
-    alert("Tento modul ešte nie je aktívny.");
-  }
-}
-
-// ── PAYMENT FORM ──────────────────────────────────────────────────────────────
-function setTodayDate() {
-  const today = new Date().toISOString().split("T")[0];
-  document.getElementById("f-date").value = today;
-}
-
-function setDirection(dir) {
-  payDirection = dir;
-  document.getElementById("btn-income").className  = "toggle-btn" + (dir === "income"  ? " active-income"  : "");
-  document.getElementById("btn-expense").className = "toggle-btn" + (dir === "expense" ? " active-expense" : "");
-  updateCategoryDropdown();
-  updateDphField();
-}
-
-function setPaymentType(type) {
-  payType = type;
-  document.getElementById("btn-cash").className = "ptoggle-btn" + (type === "cash" ? " active" : "");
-  document.getElementById("btn-card").className = "ptoggle-btn" + (type === "card" ? " active" : "");
-  updateDphField();
-  updateDphNotice();
-}
-
-function setDph(val) {
-  hasDph = val;
-  document.getElementById("btn-dph").className   = "ptoggle-btn" + (val  ? " active" : "");
-  document.getElementById("btn-nodph").className = "ptoggle-btn" + (!val ? " active" : "");
-}
-
-function updateDphField() {
-  const show = payType === "card" && payDirection === "income";
-  document.getElementById("dph-field").style.display = show ? "block" : "none";
-}
-
-function updateDphNotice() {
-  // Show warning only if cash is selected and user toggles DPH on (future feature)
-  // For now always hidden — the note gets added automatically on submit
-  document.getElementById("dph-notice").classList.remove("visible");
-}
-
-function updateCategoryDropdown() {
-  const sel = document.getElementById("f-category");
-  const cats = payDirection === "income"
-    ? MANUM_CONFIG.incomeCategories
-    : MANUM_CONFIG.expenseCategories;
-  sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join("");
-}
-
-async function submitPayment() {
-  const amount = parseFloat(document.getElementById("f-amount").value);
-  const desc   = document.getElementById("f-desc").value.trim();
-  const cat    = document.getElementById("f-category").value;
-  const date   = document.getElementById("f-date").value;
-  const note   = document.getElementById("f-note").value.trim();
-
-  if (!amount || amount <= 0) { showStatus("payment-status", "error", "Zadaj sumu."); return; }
-  if (!desc)  { showStatus("payment-status", "error", "Zadaj popis."); return; }
-  if (!date)  { showStatus("payment-status", "error", "Zadaj dátum."); return; }
-
-  const yearCfg = getYearConfig();
-  const sheetKey = payType === "cash" ? "cash" : "digital";
-  const sheetCfg = yearCfg.sheets[sheetKey];
-  const tab = payDirection === "income" ? sheetCfg.incomeTab : sheetCfg.expenseTab;
-
-  const payload = {
-    action:      "addPayment",
-    sheetId:     sheetCfg.sheetId,
-    tab:         tab,
-    direction:   payDirection,
-    paymentType: payType,
-    amount:      amount,
-    description: desc,
-    category:    cat,
-    member:      currentMember.name,
-    date:        date,
-    note:        note,
-    hasDph:      hasDph,
-    dph:         hasDph ? 23 : 0,
-    amountWithDph: hasDph ? +(amount * 1.23).toFixed(2) : amount,
-  };
-
-  document.getElementById("payment-submit").disabled = true;
-  showStatus("payment-status", "loading", "Ukladám...");
-
-  const ok = await postToScript(payload);
-
-  if (ok) {
-    showStatus("payment-status", "success", "✓ Platba uložená");
-    document.getElementById("f-amount").value = "";
-    document.getElementById("f-desc").value = "";
-    document.getElementById("f-note").value = "";
-    setTodayDate();
-  } else {
-    showStatus("payment-status", "error", "Chyba pri ukladaní. Skontroluj pripojenie.");
-  }
-  document.getElementById("payment-submit").disabled = false;
-}
-
-// ── ATTENDANCE ────────────────────────────────────────────────────────────────
-let attMode = "quick";
-
-function startClock() {
-  function tick() {
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2,"0");
-    const mm = String(now.getMinutes()).padStart(2,"0");
-    document.getElementById("att-clock").textContent = hh + ":" + mm;
-    const days = ["Nedeľa","Pondelok","Utorok","Streda","Štvrtok","Piatok","Sobota"];
-    const months = ["jan","feb","mar","apr","máj","jún","júl","aug","sep","okt","nov","dec"];
-    document.getElementById("att-date").textContent =
-      days[now.getDay()] + ", " + now.getDate() + ". " + months[now.getMonth()] + " " + now.getFullYear();
-  }
-  tick();
-  setInterval(tick, 10000);
-}
-
-function setAttDate() {
-  const today = new Date().toISOString().split("T")[0];
-  document.getElementById("att-date-input").value = today;
-}
-
-function setAttMode(mode) {
-  attMode = mode;
-  document.getElementById("btn-quick").className  = "att-mode-btn" + (mode === "quick"  ? " active" : "");
-  document.getElementById("btn-manual").className = "att-mode-btn" + (mode === "manual" ? " active" : "");
-  document.getElementById("att-quick-mode").style.display  = mode === "quick"  ? "block" : "none";
-  document.getElementById("att-manual-mode").className     = "manual-hours" + (mode === "manual" ? " visible" : "");
-}
-
-async function logAttendance(type) {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2,"0");
-  const mm = String(now.getMinutes()).padStart(2,"0");
-  const timeStr = hh + ":" + mm;
-
-  const yearCfg = getYearConfig();
-  const attCfg  = yearCfg.sheets.attendance;
-
-  const payload = {
-    action:   "addAttendance",
-    sheetId:  attCfg.sheetId,
-    tab:      attCfg.tab,
-    member:   currentMember.name,
-    date:     now.toISOString(),
-    hoursIn:  type === "arrive" ? timeStr : "",
-    hoursOut: type === "leave"  ? timeStr : "",
-    totalHours: "",
-    note:     type === "arrive" ? "Príchod" : "Odchod",
-  };
-
-  showStatus("att-status", "loading", "Ukladám...");
-  const ok = await postToScript(payload);
-  if (ok) {
-    showStatus("att-status", "success", `✓ ${type === "arrive" ? "Príchod" : "Odchod"} zaznamenaný o ${timeStr}`);
-  } else {
-    showStatus("att-status", "error", "Chyba. Skontroluj pripojenie.");
-  }
-}
-
-async function submitManualAttendance() {
-  const date     = document.getElementById("att-date-input").value;
-  const arrive   = document.getElementById("att-arrive-input").value;
-  const leave    = document.getElementById("att-leave-input").value;
-  const hours    = document.getElementById("att-hours-input").value;
-  const note     = document.getElementById("att-note-input").value.trim();
-  const cleaning = document.getElementById("att-cleaning-input").value;
-  const work     = document.getElementById("att-work-input").value;
-
-  if (!date) { showStatus("att-status", "error", "Zadaj dátum."); return; }
-  if (!arrive && !leave && !hours) {
-    showStatus("att-status", "error", "Zadaj časy alebo počet hodín."); return;
-  }
-
-  // Auto-calculate total hours if both times given
-  let total = hours ? parseFloat(hours) : "";
-  if (arrive && leave && !hours) {
-    const [ah, am] = arrive.split(":").map(Number);
-    const [lh, lm] = leave.split(":").map(Number);
-    total = ((lh * 60 + lm) - (ah * 60 + am)) / 60;
-    total = Math.max(0, +total.toFixed(2));
-  }
-
-  // Soft warning if activity split exceeds total (don't block submit)
-  const cleaningH = cleaning ? parseFloat(cleaning) : 0;
-  const workH     = work     ? parseFloat(work)     : 0;
-  if (total && (cleaningH + workH) > total + 0.01) {
-    showStatus("att-status", "error",
-      `Upratovanie (${cleaningH}h) + práca (${workH}h) presahuje celkový čas (${total}h). Skontroluj hodnoty.`);
-    return;
-  }
-
-  const yearCfg = getYearConfig();
-  const attCfg  = yearCfg.sheets.attendance;
-
-  const payload = {
-    action:       "addAttendance",
-    sheetId:      attCfg.sheetId,
-    tab:          attCfg.tab,
-    member:       currentMember.name,
-    date:         date + "T00:00:00",
-    hoursIn:      arrive,
-    hoursOut:     leave,
-    totalHours:   total,
-    hoursWork:    workH     || "",
-    hoursCleaning: cleaningH || "",
-    note:         note,
-  };
-
-  showStatus("att-status", "loading", "Ukladám...");
-  const ok = await postToScript(payload);
-  if (ok) {
-    showStatus("att-status", "success", "✓ Dochádzka uložená");
-    document.getElementById("att-arrive-input").value   = "";
-    document.getElementById("att-leave-input").value    = "";
-    document.getElementById("att-hours-input").value    = "";
-    document.getElementById("att-cleaning-input").value = "";
-    document.getElementById("att-work-input").value     = "";
-    document.getElementById("att-note-input").value     = "";
-  } else {
-    showStatus("att-status", "error", "Chyba. Skontroluj pripojenie.");
-  }
-}
-
-// ── API CALL ──────────────────────────────────────────────────────────────────
-function postToScript(payload) {
-  return new Promise((resolve) => {
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const url = MANUM_CONFIG.appsScriptUrl
-      + "?action=write&payload=" + encoded;
-
-    // Use hidden iframe — bypasses iOS Safari CSP restrictions on script injection
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    document.body.appendChild(iframe);
-
-    const timeout = setTimeout(() => {
-      cleanup();
-      // Treat timeout as success — Apps Script likely wrote the data
-      // even if we can't confirm due to cross-origin iframe restrictions
-      resolve(true);
-    }, 5000);
-
-    function cleanup() {
-      clearTimeout(timeout);
-      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+// ── CASHFLOW CHART ────────────────────────────────────────────────────────────────
+function renderCashflowChart() {
+  const d = derive();
+  const {mesacne,fixSum,clenSum} = d;
+  if (chartCashflow) chartCashflow.destroy();
+  const ctx = document.getElementById("chart-cashflow").getContext("2d");
+  chartCashflow = new Chart(ctx, {
+    type:"bar",
+    data:{
+      labels: MESIACE,
+      datasets:[
+        {label:"Zákazky", data:mesacne.map(m=>m.fakPrijmy+m.cashPrijmy), backgroundColor:"#2ECC71", stack:"p", borderRadius:2},
+        {label:"Členské", data:mesacne.map(()=>clenSum), backgroundColor:"#A855F7", stack:"p", borderRadius:2},
+        {label:"Výdavky", data:mesacne.map(m=>m.vydavky), backgroundColor:"#E74C3C", borderRadius:2},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:"#8B90A0",font:{family:"'DM Mono','Courier New',monospace",size:11}}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${eur(ctx.raw)}`}},
+        annotation:{annotations:{line1:{type:"line",yMin:fixSum,yMax:fixSum,borderColor:"#F5A623",
+          borderWidth:1.5,borderDash:[4,3],label:{content:"Fixné náklady",enabled:true,
+          color:"#F5A623",font:{size:9},position:"end"}}}},
+      },
+      scales:{
+        x:{ticks:{color:"#8B90A0",font:{size:10}},grid:{color:"#252A3A"}},
+        y:{ticks:{color:"#8B90A0",font:{size:10},callback:v=>eurS(v)},grid:{color:"#252A3A"}},
+      }
     }
-
-    iframe.onerror = function() {
-      cleanup();
-      resolve(false);
-    };
-
-    iframe.src = url;
   });
 }
 
-// ── START ─────────────────────────────────────────────────────────────────────
-init();
+// ── PIE CHART ─────────────────────────────────────────────────────────────────────
+function renderPieChart() {
+  const {katArr} = derive();
+  if (chartPie) chartPie.destroy();
+  const ctx = document.getElementById("chart-pie").getContext("2d");
+  chartPie = new Chart(ctx, {
+    type:"doughnut",
+    data:{
+      labels:katArr.map(k=>k.name),
+      datasets:[{data:katArr.map(k=>k.value),backgroundColor:PIE_COLS,borderWidth:0}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:"bottom",labels:{color:"#8B90A0",font:{size:10},padding:12}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${eur(ctx.raw)}`}},
+      }
+    }
+  });
+}
+
+// ── ZÁKAZKY ───────────────────────────────────────────────────────────────────────
+function renderZakazky(d) {
+  const {allP,otvorene,otvSum,zaplatene} = d;
+  document.getElementById("kpi-zakazky").innerHTML = [
+    kpiCard("Zaplatené celkom",    eur(zaplatene), `${allP.filter(r=>r.stav==="Zaplatená").length} zákaziek`, "var(--green)"),
+    kpiCard("Otvorené pohľadávky", eur(otvSum),    `${otvorene.length} položiek čaká`,                       "var(--accent)"),
+    kpiCard("Celkový objem",       eur(allP.reduce((s,r)=>s+r.suma,0)), "všetky zákazky",                    "var(--blue)"),
+  ].join("");
+
+  if (otvorene.length>0) {
+    show("box-otvorene");
+    document.getElementById("tbody-otvorene").innerHTML = otvorene.map(r=>`<tr>
+      <td style="color:var(--mid);font-weight:600">${r.id}</td>
+      <td>${chip(r.zdroj, r.zdroj==="Faktúra"?"blue":"mid")}</td>
+      <td style="font-weight:600">${r.klient}</td>
+      <td style="color:var(--mid)">${r.popis}</td>
+      <td style="color:var(--accent)">${r.datSplat||r.datum||"–"}</td>
+      <td class="text-right" style="font-weight:700">${eur(r.suma)}</td>
+      <td>${badge(r.stav)}</td>
+    </tr>`).join("");
+  } else { hide("box-otvorene"); }
+
+  document.getElementById("tbody-zakazky").innerHTML = allP.map(r=>`<tr>
+    <td style="color:var(--mid)">${r.id}</td>
+    <td>${chip(r.zdroj, r.zdroj==="Faktúra"?"blue":"mid")}</td>
+    <td style="font-weight:600">${r.klient}</td>
+    <td style="color:var(--mid)">${r.popis}</td>
+    <td style="color:var(--dim)">${r.datVyst||r.datum||"–"}</td>
+    <td class="text-right">${eur(r.zaklad)}</td>
+    <td class="text-right" style="color:var(--mid)">${eur(r.dph)}</td>
+    <td class="text-right" style="font-weight:700">${eur(r.suma)}</td>
+    <td>${badge(r.stav)}</td>
+  </tr>`).join("");
+}
+
+// ── VÝDAVKY ───────────────────────────────────────────────────────────────────────
+function renderVydavky(d) {
+  const {allV,vydSum,katArr} = d;
+  document.getElementById("kat-sumar").innerHTML = katArr.map((k,i)=>`
+    <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:9px;height:9px;border-radius:2px;background:${PIE_COLS[i%PIE_COLS.length]}"></div>
+        <span style="font-size:12px">${k.name}</span>
+      </div>
+      <span style="font-weight:700;color:${PIE_COLS[i%PIE_COLS.length]}">${eur(k.value)}</span>
+    </div>`).join("") +
+    `<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:700;border-top:1px solid var(--border);margin-top:4px">
+      <span style="color:var(--mid)">SPOLU</span><span style="color:var(--red)">${eur(vydSum)}</span>
+    </div>`;
+
+  document.getElementById("tbody-vydavky").innerHTML = allV.map(r=>`<tr>
+    <td style="color:var(--dim)">${r.datum}</td>
+    <td>${chip(r.zdroj, r.zdroj==="Banka"?"blue":"mid")}</td>
+    <td style="font-weight:600">${r.prijemca}</td>
+    <td style="color:var(--mid)">${r.popis}</td>
+    <td><span class="chip chip-mid">${r.kategoria}</span></td>
+    <td class="text-right">${eur(r.zaklad)}</td>
+    <td class="text-right" style="color:var(--mid)">${eur(r.dph)}</td>
+    <td class="text-right" style="font-weight:700;color:var(--red)">${eur(r.suma)}</td>
+    <td>${badge(r.stav)}</td>
+  </tr>`).join("");
+
+  document.getElementById("tfoot-vydavky").innerHTML = `
+    <td colspan="7" style="color:var(--accent)">SPOLU</td>
+    <td class="text-right" style="color:var(--red)">${eur(vydSum)}</td><td></td>`;
+}
+
+// ── ČLENSKÉ ───────────────────────────────────────────────────────────────────────
+function renderClenske(d) {
+  const {clenSum,fixSum} = d;
+  const rozdiel = clenSum - fixSum;
+  document.getElementById("kpi-clenske").innerHTML = [
+    kpiCard("Celkové členské / mes.", eur(clenSum), `${(RAW.clenske||[]).length} členov`,            "var(--purple)"),
+    kpiCard("Fixné náklady / mes.",   eur(fixSum),  "nájom + energie + účtovníčka",                  "var(--accent)"),
+    kpiCard("Rozdiel",                eur(rozdiel), rozdiel>=0?"Pokrýva fixné náklady":"Nedostatok",  rozdiel>=0?"var(--green)":"var(--red)"),
+  ].join("");
+
+  document.getElementById("clenske-list").innerHTML =
+    (RAW.clenske||[]).map(r=>`
+      <div class="member-row">
+        <div class="member-left">
+          <div class="avatar">${r.meno[0]}</div>
+          <span class="member-name">${r.meno}</span>
+        </div>
+        <span class="member-val">${eur(r.suma)}</span>
+      </div>`).join("") +
+    `<div style="display:flex;justify-content:space-between;padding:12px 0 0;font-weight:700;font-size:14px">
+      <span style="color:var(--mid)">SPOLU</span><span style="color:var(--purple)">${eur(clenSum)}</span>
+    </div>`;
+
+  const rCol = rozdiel>=0?"var(--green)":"var(--red)";
+  const rBg  = rozdiel>=0?"var(--greendim)":"var(--reddim)";
+  document.getElementById("fixne-list").innerHTML =
+    (RAW.fixneNaklady||[]).filter(r=>r.suma>0).map(r=>`
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--mid)">${r.typ}</span>
+        <span style="font-weight:600;color:var(--accent)">${eur(r.suma)}</span>
+      </div>`).join("") +
+    `<div style="display:flex;justify-content:space-between;padding:10px 0 4px;font-weight:700;border-top:1px solid var(--border);margin-top:4px">
+      <span style="color:var(--mid)">SPOLU</span><span style="color:var(--accent)">${eur(fixSum)}</span>
+    </div>
+    <div class="alert-box" style="background:${rBg};border:1px solid ${rCol}">
+      <div class="alert-title" style="color:${rCol}">${rozdiel>=0?"✓ ČLENSKÉ POKRÝVA FIXNÉ NÁKLADY":"⚠ ČLENSKÉ NEPOKRÝVA FIXNÉ NÁKLADY"}</div>
+      <div style="font-size:12px;color:var(--mid)">${eur(clenSum)} − ${eur(fixSum)} = <b style="color:${rCol}">${eur(rozdiel)}</b></div>
+    </div>`;
+}
+
+// ── COMPONENT HELPERS ─────────────────────────────────────────────────────────────
+function kpiCard(label, val, sub, col) {
+  return `<div class="kpi-card">
+    <div class="kpi-label">${label.toUpperCase()}</div>
+    <div class="kpi-val" style="color:${col}">${val}</div>
+    <div class="kpi-sub">${sub}</div>
+  </div>`;
+}
+function infoRow(label, val, col, bold=false) {
+  return `<div class="info-row${bold?" bold":""}">
+    <span class="lbl">${label}</span>
+    <span class="val" style="color:${col}">${val}</span>
+  </div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────────
+loadData();
 </script>
 </body>
 </html>
