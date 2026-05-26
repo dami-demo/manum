@@ -9,7 +9,7 @@ const MANUM_CONFIG = {
   // ── APPS SCRIPT URL ────────────────────────────────────────
   // Your existing Apps Script Web App URL (used for reading dashboard data)
   // The app will POST to this same URL to write new entries.
-  appsScriptUrl: "https://script.google.com/macros/s/AKfycbyaPaqTDV19N5vD1r1x9yOaLy7pPl5e5rp9UolHaAVJ/dev",
+  appsScriptUrl: "https://script.google.com/macros/s/AKfycbyaPaqTDV19N5vD1r1x9yOaLy7pPl5e5rp9UolHaAVJ/exec",
 
   // ── MEMBERS ────────────────────────────────────────────────
   // Add or remove members here. PIN must be 4 digits.
