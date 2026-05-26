@@ -1087,6 +1087,7 @@ async function submitManualAttendance() {
 async function postToScript(payload) {
   try {
     const encoded = encodeURIComponent(JSON.stringify(payload));
+    console.log("URL:", MANUM_CONFIG.appsScriptUrl + "?action=write&payload=" + encoded);
     const url = MANUM_CONFIG.appsScriptUrl + "?action=write&payload=" + encoded;
     await fetch(url, { method: "GET", mode: "no-cors" });
     return true;
