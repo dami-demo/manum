@@ -1086,15 +1086,16 @@ async function submitManualAttendance() {
 // ── API CALL ──────────────────────────────────────────────────────────────────
 async function postToScript(payload) {
   try {
-    const resp = await fetch(MANUM_CONFIG.appsScriptUrl, {
+    // Apps Script POST requires no-cors due to redirect stripping CORS headers.
+    // With no-cors we cannot read the response — we treat any non-throw as success.
+    // Check Apps Script → Executions log if data is not appearing in sheets.
+    await fetch(MANUM_CONFIG.appsScriptUrl, {
       method:  "POST",
-      headers: { "Content-Type": "text/plain" }, // Apps Script requires text/plain for POST
+      headers: { "Content-Type": "text/plain" },
       body:    JSON.stringify(payload),
-      redirect: "follow",
+      mode:    "no-cors",
     });
-    const text = await resp.text();
-    const data = JSON.parse(text);
-    return data.success === true;
+    return true;
   } catch (err) {
     console.error("postToScript error:", err);
     return false;
